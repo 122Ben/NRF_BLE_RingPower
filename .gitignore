@@ -1,0 +1,9 @@
+NRF52832/s132/arm5_no_packs/*
+!NRF52832/s132/arm5_no_packs/ble_app.uvoptx
+!NRF52832/s132/arm5_no_packs/ble_app.uvprojx
+NRF52840/s140/arm5_no_packs/*
+!NRF52840/s140/arm5_no_packs/ble_app.uvoptx
+!NRF52840/s140/arm5_no_packs/ble_app.uvprojx
+NRF52833/s140/arm5_no_packs/*
+!NRF52833/s140/arm5_no_packs/ble_app.uvoptx
+!NRF52833/s140/arm5_no_packs/ble_app.uvprojx
