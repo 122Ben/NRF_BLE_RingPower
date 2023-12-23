@@ -76,7 +76,6 @@
 
 uint16_t time1_cnt = 0;
 uint16_t time2_cnt = 0;
-uint16_t time3_cnt = 0;
 uint8_t shut_flag = 0;
 uint8_t shut_on_flag = 0;
 uint8_t shut_off_flag = 0;
@@ -146,7 +145,7 @@ uint32_t colors[11][8] = {{0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0x0
 													{0x010000, 0x010000, 0x010000, 0x010000, 0x010000, 0x010000, 0x010000, 0x010000},	
 													{0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0x000100},
 													{0x000100, 0x000100, 0x000100, 0x000100, 0x000100, 0x000100, 0x000100, 0x000100},	
-													
+
 };
 /**@brief Function for assert macro callback.
  *
@@ -159,18 +158,18 @@ uint32_t colors[11][8] = {{0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0x0
  * @param[in] line_num    Line number of the failing ASSERT call.
  * @param[in] p_file_name File name of the failing ASSERT call.
  */
- 
+
 static nrf_drv_pwm_t m_pwm0 = NRF_DRV_PWM_INSTANCE(0);
 
 void pwm_callback(nrf_drv_pwm_evt_type_t event_type)    // PWM callback function
 {
     if (event_type == NRF_DRV_PWM_EVT_FINISHED) //from high to low before 
     {
-        
-        
-        
+
+
+
     }
-    
+
 }
 
 #define LED_NUM 8
@@ -193,14 +192,14 @@ void ws2812_begin(void)
         .load_mode    = NRF_PWM_LOAD_COMMON,
         .step_mode    = NRF_PWM_STEP_AUTO
     };
-    
+
     APP_ERROR_CHECK(nrf_drv_pwm_init(&m_pwm0, &config0, pwm_callback));
-      
+
 }
 void ws2812_over(void)
 {
 		nrfx_pwm_uninit(&m_pwm0);
-      
+
 }
 
 #define NEOPIXEL_BYTES 24
@@ -243,7 +242,6 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
 {
     app_error_handler(DEAD_BEEF, line_num, p_file_name);
 }
-
 
 /**@brief Function for initializing the timer module.
  */
@@ -329,14 +327,13 @@ APP_TIMER_DEF(dingshi_timer);
 
 static void m_sample_timer_handler(void *p_context)
 {
-//	NRF_LOG_INFO("time1_cnt=%d\r\n",time1_cnt);
+	NRF_LOG_INFO("time1_cnt=%d\r\n",time1_cnt);
 	//开关机判断
 	if (nrf_gpio_pin_read(MCU_KEY) == 1)
 	{
-		time3_cnt = 0;
 		time1_cnt++;
 //		NRF_LOG_INFO("time1_cnt = %d ",time1_cnt);
-		if (time1_cnt ==  150)
+		if (time1_cnt ==  200)
 		{
 			if (nrf_gpio_pin_read(MCU_KEY) == 1)
 			{
@@ -347,13 +344,13 @@ static void m_sample_timer_handler(void *p_context)
 			{
 				nrf_gpio_pin_set(MCU_EN);
 				shut_on_flag = 1;
-//				NRF_LOG_INFO("3.7V power output.");
+				NRF_LOG_INFO("3.7V power output.");
 			}
 			else if (shut_flag == 2)
 			{
 				nrf_gpio_pin_clear(MCU_EN);
 				shut_on_flag = 0;
-//				NRF_LOG_INFO("3.7V power close.");
+				NRF_LOG_INFO("3.7V power close.");
 				shut_flag = 0;
 			}
 		}
@@ -362,71 +359,13 @@ static void m_sample_timer_handler(void *p_context)
 	{
 		time1_cnt = 0;
 	}
-	time3_cnt++;
-	if(time3_cnt == 3)
-	{
-		time3_cnt = 0;
-		if(BAT_chrg_flag == 0)
-		{
-			if(shut_on_flag == 1)
-			{
-				switch(BAT_pwr_level)
-				{
-					case 0:
-						neopixel_write(colors[0], 8);
-						break;
-					case 1:
-						neopixel_write(colors[9], 8);
-						break;
-					case 2:
-						neopixel_write(colors[2], 8);
-						break;
-					case 3:
-						neopixel_write(colors[3], 8);
-						break;
-					case 4:
-						neopixel_write(colors[4], 8);
-						break;
-					case 5:
-						neopixel_write(colors[5], 8);
-						break;
-					case 6:
-						neopixel_write(colors[6], 8);
-						break;
-					case 7:
-						neopixel_write(colors[7], 8);
-						break;
-					case 8:
-						neopixel_write(colors[8], 8);
-						break;
-					default:
-						break;
-				}
-			}
-			else if(shut_on_flag == 0)
-			{
-				BAT_pwr_level = 0;
-				neopixel_write(colors[0], 8);
-			}
-		}
-		else if(BAT_chrg_flag == 1)
-		{
-			//充电中，全部显示红灯
-				neopixel_write(colors[10], 8);
-		}
-		else if(BAT_chrg_flag == 2)
-		{
-			//充满电，全部显示绿灯
-				neopixel_write(colors[8], 8);
-		}	
-	}
 }
 static void d_sample_timer_handler(void *p_context)
 {
-//	NRF_LOG_INFO("time2_cnt=%d\r\n",time2_cnt);
+	NRF_LOG_INFO("time2_cnt=%d\r\n",time2_cnt);
 	//充放电状态判断
 	time2_cnt++;
-	if(time2_cnt % 5 == 0)
+	if(time2_cnt%5 == 0)
 	{
 		nrfx_saadc_sample_convert(0, &saadc_val);
 		sum += saadc_val;
@@ -439,7 +378,7 @@ static void d_sample_timer_handler(void *p_context)
 			num_samples = 0;
 		}
 	}
-	else if(time2_cnt % 11 == 0)
+	else if(time2_cnt%11 == 0)
 	{
 		if((nrf_gpio_pin_read(STBY) == 1)&&(nrf_gpio_pin_read(CHRG) == 0))
 		{
@@ -454,15 +393,14 @@ static void d_sample_timer_handler(void *p_context)
 			BAT_chrg_flag = 0;
 		}	
 	}
-	
 	//电池电量监测
-	else if(time2_cnt == 50 )
+	else if(time2_cnt > 50)
 	{
 		time2_cnt = 0;
 		//电池电量转化为0-4.2V范围，以对应
 		adc_voltage = (float)new_saadc_val / 1024 * 1.8 / 0.4194;
-		
-		if (adc_voltage >= 3.0 && adc_voltage <= 3.68) 
+
+		if (adc_voltage >= 3.0 && adc_voltage <= 3.711) 
 		{
 			if(shut_on_flag == 1)
 			{
@@ -473,7 +411,7 @@ static void d_sample_timer_handler(void *p_context)
 				BAT_pwr_level = 0;
 			}
 		} 
-		else if (adc_voltage > 3.68 && adc_voltage <= 3.746) 
+		else if (adc_voltage > 3.711 && adc_voltage <= 3.746) 
 		{
 			if(shut_on_flag == 1)
 			{
@@ -484,7 +422,7 @@ static void d_sample_timer_handler(void *p_context)
 				BAT_pwr_level = 0;
 			}
 		} 
-		else if (adc_voltage > 3.746 && adc_voltage <= 3.785) 
+		else if (adc_voltage > 3.746 && adc_voltage <= 3.769) 
 		{
 			if(shut_on_flag == 1)
 			{
@@ -495,7 +433,7 @@ static void d_sample_timer_handler(void *p_context)
 				BAT_pwr_level = 3;
 			}
 		} 
-		else if (adc_voltage > 3.785 && adc_voltage <= 3.826) 
+		else if (adc_voltage > 3.769 && adc_voltage <= 3.826) 
 		{
 			if(shut_on_flag == 1)
 			{
@@ -550,11 +488,10 @@ static void d_sample_timer_handler(void *p_context)
 				BAT_pwr_level = 0;
 			}
 		} 
-		
+
 	}
 
 
-	
 }
 
 
@@ -581,7 +518,7 @@ static void timers_start(void)
 
 static void saadc_callback(nrf_drv_saadc_evt_t const *p_event)
 {
-    
+
 }
 
 void saadc_init(void)
@@ -615,7 +552,7 @@ void gpio_init(void)
 int main(void)
 {
     bool erase_bonds;
-		int i = 0;
+//		int i = 0;
     // Initialize.
 
     log_init();
@@ -632,15 +569,67 @@ int main(void)
 		// Start execution.    
     advertising_start(); 
 		timers_start();
-	
+
 //		neopixel_write(colors[2], 8);
-//		NRF_LOG_INFO("BLE Template Init.");
+		NRF_LOG_INFO("BLE Template Init.");
 
     // Enter main loop.
     for (;;)
     {
-//			nrf_delay_ms(5);
-
+			nrf_delay_ms(5);
+			if(BAT_chrg_flag == 0)
+			{
+				if(shut_on_flag == 1)
+				{
+					switch(BAT_pwr_level)
+					{
+						case 0:
+							neopixel_write(colors[0], 8);
+							break;
+						case 1:
+							neopixel_write(colors[9], 8);
+							break;
+						case 2:
+							neopixel_write(colors[2], 8);
+							break;
+						case 3:
+							neopixel_write(colors[3], 8);
+							break;
+						case 4:
+							neopixel_write(colors[4], 8);
+							break;
+						case 5:
+							neopixel_write(colors[5], 8);
+							break;
+						case 6:
+							neopixel_write(colors[6], 8);
+							break;
+						case 7:
+							neopixel_write(colors[7], 8);
+							break;
+						case 8:
+							neopixel_write(colors[8], 8);
+							break;
+						default:
+							break;
+					}
+				}
+				else if(shut_on_flag == 0)
+				{
+					BAT_pwr_level = 0;
+					neopixel_write(colors[0], 8);
+				}
+			}
+			else if(BAT_chrg_flag == 1)
+			{
+				//充电中，全部显示红灯
+					neopixel_write(colors[10], 8);
+			}
+			else if(BAT_chrg_flag == 2)
+			{
+				//充满电，全部显示绿灯
+					neopixel_write(colors[8], 8);
+			}	
 			idle_state_handle();
     }
 }
